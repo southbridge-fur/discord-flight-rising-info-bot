@@ -10,7 +10,6 @@ client = discord.Client()
 
 def lookupDragon(dragonid):
     baseurl = "http://flightrising.com"
-    #dragonid = "29939190"
 
     stats = {"str" : "",
              "int" : "",
@@ -26,7 +25,9 @@ def lookupDragon(dragonid):
         
         r = requests.get("{}/main.php?dragon={}".format(baseurl,dragonid))
         data = re.search(re.compile("\
-font-size.22px.*?text-align.left.*?731d08[^>]*>\s*(?P<name>\w*).*?<br>[^>]*>\s*\#(?P<id>[0-9]*)\
+href=\"main.php\?p=lair&id=(?P<lair>\d*)\
+.*?font-size.22px..text-align.left..color..?731d08[^>]*>\s*(?P<name>\w*).*?<br>[^>]*>\s*\#(?P<id>[0-9]*)\
+.*?a\ class=\"elemclue\"\ TITLE.\"(?P<flight>\w*)\
 .*?\
 Info\
 .*?bold;\">Level\ (?P<level>[^\s<]*)</div>\
@@ -96,17 +97,29 @@ async def on_message(message):
                 
             
             print("Creating embed")
-            embed = discord.Embed(title="**Dragon Profile:** #{}".format(dragonid),colour=discord.Colour(0xFFFFFF))
+            flightmap = {"arcane" : 0xee14dc,
+                         "earth" : 0x6b3918,
+                         "fire" : 0xff8c0f,
+                         "ice" : 0xd3e2ff,
+                         "light" : 0xf3e336,
+                         "lightning" : 0x33f2ed,
+                         "nature" : 0x288d13,
+                         "plague" : 0xfe0000,
+                         "shadow" : 0x560081,
+                         "water" : 0x2f45f3,
+                         "wind" : 0xc3f874}
+
+            embed = discord.Embed(title="**Dragon Profile**",description="[#{0}](http://flightrising.com/main.php?dragon={0})".format(dragonid),colour=discord.Colour(flightmap[ddata["data"]["flight"].lower()]))
             
             na = "Not Available"
-
+            
             embed.add_field(name="Name",value=ddata["data"]["name"],inline=True)
             embed.add_field(name="Owner",value=na,inline=True)
             embed.add_field(name="Breed",value=ddata["data"]["breed"],inline=True)
             embed.add_field(name="Sex",value=ddata["data"]["sex"],inline=True)
             embed.add_field(name="Level",value=ddata["data"]["level"],inline=True)
 
-            embed.add_field(name="Flight",value=na,inline=True)
+            embed.add_field(name="Flight",value=ddata["data"]["flight"],inline=True)
             embed.add_field(name="Hatchday",value=ddata["data"]["hatchday"],inline=True)
 
             embed.add_field(name="Links",value=na,inline=True)

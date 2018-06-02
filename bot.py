@@ -36,7 +36,7 @@ def lookupDragon(dragonid):
         
     r = requests.get(getDragonURL(dragonid))
     data = re.search(re.compile("\
-href=\"main.php\?p=lair&id=(?P<lair>\d*)\
+>\s*(?P<owner>[^:]*):\ <a\ href=\"main.php\?p=lair&id=(?P<lair>\d*)\
 .*?font-size.22px..text-align.left..color..?731d08[^>]*>\s*(?P<name>\w*).*?<br>[^>]*>\s*\#(?P<id>[0-9]*)\
 .*?a\ class=\"elemclue\"\ TITLE.\"(?P<flight>\w*)\
 .*?\
@@ -67,13 +67,6 @@ Parents\
     #              "stats" : stats}
     
     ddata = {"data" : data.groupdict()}
-    r = requests.get("{}/main.php?p=lair&tab=userpage&id={}".format(baseurl,ddata["data"]["lair"]))
-    
-    owner = re.search(re.compile("\
-    font-size:22px; text-align:left; color:#731d08; font-weight:bold[^>]*>\s*(?P<owner>[^']*)'s? Clan\
-    ", re.DOTALL), r.text)
-    
-    ddata["data"]["owner"] = owner.groupdict()["owner"]
     
     #(json.dumps(ddata,indent=4))
     return ddata

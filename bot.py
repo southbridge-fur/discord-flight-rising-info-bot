@@ -67,6 +67,10 @@ Parents\
     #              "stats" : stats}
     
     ddata = {"data" : data.groupdict()}
+    offspring = re.search(re.compile("Offspring.*?margin-left[^>]*>(.*?)</div>",re.DOTALL),r.text)
+    
+    ddata["data"]["offspring"] = len(re.findall(re.compile("<br />",re.DOTALL),offspring.group(1)))
+
     
     #(json.dumps(ddata,indent=4))
     return ddata
@@ -149,12 +153,12 @@ async def on_message(message):
 #            embed.add_field(name="Stats",value=stats,inline=False)
 
             if ddata["data"]["parents"]:
-                embed.add_field(name="Lineage",value="No Parents\nChildren:\t{0}".format(na))
+                embed.add_field(name="Lineage",value="No Parents\nOffspring: {0}".format(ddata["data"]["offspring"]))
             else:
-                embed.add_field(name="Lineage",value="Father:\t{0}\nMother:\t{1}\nChildren:\t{2}".format(
+                embed.add_field(name="Lineage",value="Father:{0}\nMother:{1}\nOffspring: {2}".format(
                     "[{0}]({1})".format(ddata["data"]["father_name"],getDragonURL(ddata["data"]["father_id"])),
                     "[{0}]({1})".format(ddata["data"]["mother_name"],getDragonURL(ddata["data"]["mother_id"])),
-                    na),inline=False)
+                    ddata["data"]["offspring"]),inline=False)
 
 #            embed.add_field(name="Length",value=ddata["data"]["length"])
 #            embed.add_field(name="Wingspan",value=ddata["data"]["wingspan"],inline=True)

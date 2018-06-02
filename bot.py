@@ -8,23 +8,34 @@ import time
 
 client = discord.Client()
 
-def lookupDragon(dragonid):
-    baseurl = "http://flightrising.com"
+baseurl = "http://flightrising.com"
 
-    stats = {"str" : "",
-             "int" : "",
-             "agi" : "",
-             "vit" : "",
-             "def" : "",
-             "mnd" : "",
-             "qck" : ""}
-    for i in stats.keys():
-        r = requests.get("{}/includes/ol/dstats.php?d={}&s={}".format(baseurl,dragonid,i))
-        matches = re.match(re.compile("^.*?left[^>]*>(?P<name>\w+).*?right[^>]*>(?P<base>\d+)[^>]*>(?P<mod>[^<]*).*?color[^>]*>(?P<battle>[^<]*).*?color[^>]*>(?P<dom>[^<]*).*$",re.DOTALL),r.text)
-        stats[i] = matches.groupdict()
+def getDragonImageURL(dragonid):
+    id = int(dragonid)
+    link = "http://flightrising.com/rendern/{2}/{0}/{1}_{2}.png".format(int((id/100)+1),id,350)
+    return link
+
+def getDragonURL(dragonid):
+    global baseurl
+    return "{}/main.php?dragon={}".format(baseurl,dragonid)
+
+def lookupDragon(dragonid):
+    global baseurl
+    
+    # stats = {"str" : "",
+    #          "int" : "",
+    #          "agi" : "",
+    #          "vit" : "",
+    #          "def" : "",
+    #          "mnd" : "",
+    #          "qck" : ""}
+    # for i in stats.keys():
+    #     r = requests.get("{}/includes/ol/dstats.php?d={}&s={}".format(baseurl,dragonid,i))
+    #     matches = re.match(re.compile("^.*?left[^>]*>(?P<name>\w+).*?right[^>]*>(?P<base>\d+)[^>]*>(?P<mod>[^<]*).*?color[^>]*>(?P<battle>[^<]*).*?color[^>]*>(?P<dom>[^<]*).*$",re.DOTALL),r.text)
+    #     stats[i] = matches.groupdict()
         
-        r = requests.get("{}/main.php?dragon={}".format(baseurl,dragonid))
-        data = re.search(re.compile("\
+    r = requests.get(getDragonURL(dragonid))
+    data = re.search(re.compile("\
 href=\"main.php\?p=lair&id=(?P<lair>\d*)\
 .*?font-size.22px..text-align.left..color..?731d08[^>]*>\s*(?P<name>\w*).*?<br>[^>]*>\s*\#(?P<id>[0-9]*)\
 .*?a\ class=\"elemclue\"\ TITLE.\"(?P<flight>\w*)\
@@ -43,18 +54,29 @@ Genes\
 .*?Primary</span>(?P<gene_primary>[^<]*)\
 .*?Secondary</span>(?P<gene_secondary>[^<]*)\
 .*?Tertiary</span>(?P<gene_tertiary>[^<]*)\
+.*?\
+Parents\
+.*?margin-left.*?(<em>(?P<parents>none)</em>|\
+(a\ href=\"main.php\?p=view&id=\d*&tab=dragon&did=(?P<father_id>\d*)[^>]*>(?P<father_name>\w*))\
+.*?\
+(a\ href=\"main.php\?p=view&id=\d*&tab=dragon&did=(?P<mother_id>\d*)[^>]*>(?P<mother_name>\w*))\
+)\
 ",re.VERBOSE | re.DOTALL),r.text)
         
-    ddata = {"data" : data.groupdict(),
-                 "stats" : stats}
+    # ddata = {"data" : data.groupdict(),
+    #              "stats" : stats}
+    
+    ddata = {"data" : data.groupdict()}
+    r = requests.get("{}/main.php?p=lair&tab=userpage&id={}".format(baseurl,ddata["data"]["lair"]))
+    
+    owner = re.search(re.compile("\
+    font-size:22px; text-align:left; color:#731d08; font-weight:bold[^>]*>\s*(?P<owner>[^']*)'s? Clan\
+    ", re.DOTALL), r.text)
+    
+    ddata["data"]["owner"] = owner.groupdict()["owner"]
+    
     #(json.dumps(ddata,indent=4))
     return ddata
-
-def getDragonImageURL(dragonid):
-    id = int(dragonid)
-    link = "http://flightrising.com/rendern/{2}/{0}/{1}_{2}.png".format(int((id/100)+1),id,350)
-    return link
-
 
 @client.event
 async def on_ready():
@@ -74,11 +96,12 @@ async def on_message(message):
         if command[0] == "hi" or command[0] == "hello":
             await client.send_message(message.channel, 'hello!')
         elif command[0] == "lookup":
+            global baseurl
             dragonid = command[1]
             print("Parsing dragon id #{}".format(dragonid))
             ddata = lookupDragon(dragonid)
 
-            print("Getting dragon iamge")
+            print("Getting dragon image")
             imagesDir = "dergs"
             tempFile = "/".join([imagesDir,"{0}-{1}-{2}.png".format(dragonid,ddata["data"]["name"],int(time.time()/60))])
             if not os.path.isdir(imagesDir):
@@ -109,22 +132,21 @@ async def on_message(message):
                          "water" : 0x2f45f3,
                          "wind" : 0xc3f874}
 
-            embed = discord.Embed(title="**Dragon Profile**",description="[#{0}](http://flightrising.com/main.php?dragon={0})".format(dragonid),colour=discord.Colour(flightmap[ddata["data"]["flight"].lower()]))
+            embed = discord.Embed(title="**Dragon Profile**",description="[#{0}]({1})".format(dragonid,getDragonURL(dragonid)),colour=discord.Colour(flightmap[ddata["data"]["flight"].lower()]))
             
             na = "Not Available"
             
             embed.add_field(name="Name",value=ddata["data"]["name"],inline=True)
-            embed.add_field(name="Owner",value=na,inline=True)
+            embed.add_field(name="Owner",value=ddata["data"]["owner"],inline=True)
+            embed.add_field(name="Flight",value=ddata["data"]["flight"],inline=True)
             embed.add_field(name="Breed",value=ddata["data"]["breed"],inline=True)
             embed.add_field(name="Sex",value=ddata["data"]["sex"],inline=True)
             embed.add_field(name="Level",value=ddata["data"]["level"],inline=True)
-
-            embed.add_field(name="Flight",value=ddata["data"]["flight"],inline=True)
             embed.add_field(name="Hatchday",value=ddata["data"]["hatchday"],inline=True)
-
+            
             embed.add_field(name="Links",value=na,inline=True)
-
-            embed.add_field(name="Colors and Genes",value="""
+            
+            embed.add_field(name="Colors and Genes",value="""\
 **Primary:** {0[data][gene_primary]:20}
 **Secondary:** {0[data][gene_secondary]:20}
 **Tertiary:** {0[data][gene_tertiary]:20}""".format(ddata),inline=False)
@@ -133,7 +155,13 @@ async def on_message(message):
 #            stats = "{0[0]}\t{0[1]}\n{0[2]}\t{0[3]}\n{0[4]}\t{0[5]}\n{0[6]}".format(["**{0:4}**: {1:4} {2}".format(i.upper(),ddata["stats"][i]["base"],ddata["stats"][i]["mod"],align="right") for i in ddata["stats"].keys()])
 #            embed.add_field(name="Stats",value=stats,inline=False)
 
-            embed.add_field(name="Lineage",value="{0}\n{0}\n{0}".format(na),inline=False)
+            if ddata["data"]["parents"]:
+                embed.add_field(name="Lineage",value="No Parents\nChildren:\t{0}".format(na))
+            else:
+                embed.add_field(name="Lineage",value="Father:\t{0}\nMother:\t{1}\nChildren:\t{2}".format(
+                    "[{0}]({1})".format(ddata["data"]["father_name"],getDragonURL(ddata["data"]["father_id"])),
+                    "[{0}]({1})".format(ddata["data"]["mother_name"],getDragonURL(ddata["data"]["mother_id"])),
+                    na),inline=False)
 
 #            embed.add_field(name="Length",value=ddata["data"]["length"])
 #            embed.add_field(name="Wingspan",value=ddata["data"]["wingspan"],inline=True)

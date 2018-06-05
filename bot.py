@@ -5,6 +5,7 @@ import requests
 import re
 import os
 import time
+import random
 
 client = discord.Client()
 
@@ -92,19 +93,22 @@ async def on_message(message):
         client.send_typing(message.channel)
         command = message.content[1:].split(" ")
         if command[0] == "hi" or command[0] == "hello":
-            await client.send_message(message.channel, 'hello!')
-        elif command[0] == "scry":
+            await client.send_message(message.channel, random.choice(["Hello","GET BACK TO WORK","Greetings"]))
+#        elif command[0] == "brew":
+#            await client.send_message(message.channel, 'Got it, setting reminder for {} in 30 minutes'.format())
+#        elif command[0] == "scry":
             #http://flightrising.com/includes/ol/scryer_bloodlines.php
             #post feilds
             #id1	29939190+
             #id2	29994524+
-            print("Checking bloodlines")
+#            print("Checking bloodlines")
         elif command[0] == "lookup":
             global baseurl
             dragonid = command[1]
+
             print("Parsing dragon id #{}".format(dragonid))
             ddata = lookupDragon(dragonid)
-
+            
             print("Getting dragon image")
             imagesDir = "dergs"
             tempFile = "/".join([imagesDir,"{0}-{1}-{2}.png".format(dragonid,ddata["data"]["name"],int(time.time()/60))])

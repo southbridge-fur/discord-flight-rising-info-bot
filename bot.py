@@ -86,22 +86,35 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    #lets not bother with responding to other bots
     if message.author.bot:
         return
-
+    
     if message.content.startswith("."):
-        client.send_typing(message.channel)
+        client.send_typing(message.channel) #this doesn't work for some reason
         command = message.content[1:].split(" ")
         if command[0] == "hi" or command[0] == "hello":
-            await client.send_message(message.channel, random.choice(["Hello","GET BACK TO WORK","Greetings"]))
+            await client.send_message(message.channel, random.choice(["Hello","GET BACK TO WORK","Greetings","Hello employee {}".format(message.author.mention)]))
 #        elif command[0] == "brew":
-#            await client.send_message(message.channel, 'Got it, setting reminder for {} in 30 minutes'.format())
+#            await client.send_message(message.channel, 'Got it, setting reminder for {} in 30 minutes'.format(message.author.mention()))
 #        elif command[0] == "scry":
             #http://flightrising.com/includes/ol/scryer_bloodlines.php
             #post feilds
             #id1	29939190+
             #id2	29994524+
 #            print("Checking bloodlines")
+        elif command[0] == "work" or command[0] == "shout":
+            if len(message.mentions) > 0:
+                #I'm lazy so I'm just responding with whatever the first mention is in the list
+                await client.send_message(message.channel, "{} GET BACK TO WORK".format(message.mentions[0].mention))
+            else:
+                await client.send_message(message.channel, "GET BACK TO WORK")
+        elif command[0] == "exalt":
+            if len(message.mentions) > 0:
+                if message.mentions[0].id == client.user.id:
+                    await client.send_message(message.channel, "No")
+                else:
+                    await client.send_message(message.channel, "{0} has been exalted for {1} treasure.".format(message.mentions[0].mention,random.randint(2494,38161)))
         elif command[0] == "lookup":
             global baseurl
             dragonid = command[1]

@@ -57,9 +57,9 @@ Genes\
 .*?\
 Parents\
 .*?margin-left.*?(<em>(?P<parents>none)</em>|\
-(a\ href=\"main.php\?p=view&id=\d*&tab=dragon&did=(?P<father_id>\d*)[^>]*>(?P<father_name>\w*))\
+(a\ href=main.php\?p=view&id=\d*&tab=dragon&did=(?P<father_id>\d*)[^>]*>(?P<father_name>\w*))\
 .*?\
-(a\ href=\"main.php\?p=view&id=\d*&tab=dragon&did=(?P<mother_id>\d*)[^>]*>(?P<mother_name>\w*))\
+(a\ href=main.php\?p=view&id=\d*&tab=dragon&did=(?P<mother_id>\d*)[^>]*>(?P<mother_name>\w*))\
 )\
 ",re.VERBOSE | re.DOTALL),r.text)
         
@@ -67,6 +67,7 @@ Parents\
     #              "stats" : stats}
     
     ddata = {"data" : data.groupdict()}
+
     offspring = re.search(re.compile("Offspring.*?margin-left[^>]*>(.*?)</div>",re.DOTALL),r.text)
     
     ddata["data"]["offspring"] = len(re.findall(re.compile("<br />",re.DOTALL),offspring.group(1)))
@@ -92,6 +93,12 @@ async def on_message(message):
         command = message.content[1:].split(" ")
         if command[0] == "hi" or command[0] == "hello":
             await client.send_message(message.channel, 'hello!')
+        elif command[0] == "scry":
+            #http://flightrising.com/includes/ol/scryer_bloodlines.php
+            #post feilds
+            #id1	29939190+
+            #id2	29994524+
+            print("Checking bloodlines")
         elif command[0] == "lookup":
             global baseurl
             dragonid = command[1]
@@ -141,28 +148,32 @@ async def on_message(message):
             embed.add_field(name="Level",value=ddata["data"]["level"],inline=True)
             embed.add_field(name="Hatchday",value=ddata["data"]["hatchday"],inline=True)
             
-            embed.add_field(name="Links",value=na,inline=True)
-            
             embed.add_field(name="Colors and Genes",value="""\
 **Primary:** {0[data][gene_primary]:20}
 **Secondary:** {0[data][gene_secondary]:20}
-**Tertiary:** {0[data][gene_tertiary]:20}""".format(ddata),inline=False)
+**Tertiary:** {0[data][gene_tertiary]:20}""".format(ddata),inline=True)
 
-            
 #            stats = "{0[0]}\t{0[1]}\n{0[2]}\t{0[3]}\n{0[4]}\t{0[5]}\n{0[6]}".format(["**{0:4}**: {1:4} {2}".format(i.upper(),ddata["stats"][i]["base"],ddata["stats"][i]["mod"],align="right") for i in ddata["stats"].keys()])
 #            embed.add_field(name="Stats",value=stats,inline=False)
 
             if ddata["data"]["parents"]:
-                embed.add_field(name="Lineage",value="No Parents\nOffspring: {0}".format(ddata["data"]["offspring"]))
+                embed.add_field(name="Lineage",value="No Parents\nOffspring: {0}".format(ddata["data"]["offspring"]),inline=True)
             else:
-                embed.add_field(name="Lineage",value="Father:{0}\nMother:{1}\nOffspring: {2}".format(
+                embed.add_field(name="Lineage",value="Father: {0}\nMother: {1}\nOffspring: {2}".format(
                     "[{0}]({1})".format(ddata["data"]["father_name"],getDragonURL(ddata["data"]["father_id"])),
                     "[{0}]({1})".format(ddata["data"]["mother_name"],getDragonURL(ddata["data"]["mother_id"])),
-                    ddata["data"]["offspring"]),inline=False)
+                    ddata["data"]["offspring"]),inline=True)
 
 #            embed.add_field(name="Length",value=ddata["data"]["length"])
 #            embed.add_field(name="Wingspan",value=ddata["data"]["wingspan"],inline=True)
 #            embed.add_field(name="Weight",value=ddata["data"]["weight"],inline=True)
+
+            embed.add_field(name="Links",value="""\
+[Dressing room](http://www1.flightrising.com/dressing/outfit)
+[Bloodline](http://flightrising.com/main.php?p=scrying&view=bloodlines)
+[Morphology](http://flightrising.com/main.php?p=scrying&view=morphintime)""",inline=False)
+            
+
             await client.send_message(message.channel, None, embed=embed)
             
 creds = json.load(open("creds.json","r"))

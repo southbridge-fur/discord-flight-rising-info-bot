@@ -113,9 +113,10 @@ async def on_message(message):
 
     global responses
     global commands
+    #this is somewhat of a mess, I'm sorry
     triggeredResponses = [i for i in responses.keys() if i in message.content]
-    if triggeredResponses:
-        await client.send_typing(message.channel) #this doesn't work for some reason
+    if triggeredResponses and random.randint(0,2) <= 1:
+        await client.send_typing(message.channel)
 
         trig = random.choice(triggeredResponses)
         a = responses[trig]
@@ -125,7 +126,7 @@ async def on_message(message):
         await client.send_message(message.channel, random.choice(possible)[1])
         return
     elif message.content.startswith(commandChar):
-        await client.send_typing(message.channel) #this doesn't work for some reason
+        await client.send_typing(message.channel)
 
         content = message.content[1:]
         command = message.content[1:].split(" ")

@@ -8,6 +8,8 @@ This bot is an open recreation of an already existing flight rising info bot for
   - `.lookup <dragon id>` Parses and prints info about a particular dragon (example shown below)  
   - `.work`/`.shout` + `[@ mention]` Makes the bot shout "GET BACK TO WORK" if a user is mentioned it will tell that user to get back to work.
   - `.exalt <@ mention>` Pretends to exalt the user mentioned with a random amount of treasure given.
+  - `.transmute` PMs user with reminder after 30 minutes.
+  - `.brew <#h#m>` PMs user with reminder after user-defined amount of time.
 
 # Todo
 

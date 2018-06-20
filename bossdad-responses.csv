@@ -1,0 +1,37 @@
+trigger,role,response
+"!hello,!hi,!howdy",any,HELLO
+"!hello,!hi,!howdy",employee,GET BACK TO WORK
+"!hello,!hi,!howdy",any,GREETINGS
+"!hello,!hi,!howdy","employee,vacationer",HELLO EMPLOYEE
+"!hello,!hi,!howdy",oof,HELLO THERE AND WELCOME TO OUR OFFICES GUEST! PLEASE BE SURE TO PICK UP YOUR VISISTOR'S BADGE AT THE FRONT DESK!
+"!hello,!hi,!howdy",oof,HI WELCOMED GUEST! ENJOY OUR COFFEE AND WATCH FOR FLYING SPARKS!
+"!hello,!hi,!howdy",employee,HELLO YOUNG SPARK! COULD YOU PUT A WORK ORDER IN? THE COFFEE MACHINE HAS BROKEN
+"!hello,!hi,!howdy",vacationer,"GREETINGS! WISHING YOU A GREAT TIME ON YOUR VACATION, BUT REMEMBER TO FINISH PAPERWORK UPON RETURN TO THE OFFICE!"
+"!hello,!hi,!howdy",vacationer,HELLO FELLOW SPARK! I HOPE YOU ARE ENJOYING THE SCENERY DURING YOUR VACATION!
+"!hello,!hi,!howdy",employee,"HELLO VALUED EMPLOYEE, THERE'S FREE SNACKS IN THE BREAK ROOM BUT ONLY BECAUSE I BROKE THE VENDING MACHINE EARLIER! SORRY!"
+"!hello,!hi,!howdy",oof,ARE YOU HERE TO FILL OUT AN APPLICATION?
+":heart:, :heart~1: ","employee,vacationer",I LOVE YOU TOO LITTLE SPARK!
+":heart:, :heart~1: ",oof,I LOVE YOU TOO LITTLE ONE!
+:broken_heart: ,any,I STILL LOVE YOU!
+:avocado: ,any,BUT WHY?
+:yellowdrop:,any,"EW, WHY WOULD YOU DO THAT?"
+jon no,any,JON GET BACK TO WORK!
+dammit jon,any,JonTargaryen has been exalted for 420 treasure.
+!meme,any,ASK JON!
+!meme,any,WHERE IS THAT GAY MEMEDAD WHEN I REALLY NEED HIM?
+!meme,any,STOP BOTHERING ME!
+!meme,any,GO ASK STEVE!
+!steve,any,WHAT DID HE DO *THIS* TIME?
+!steve,any,ALERT! STEVE HAS BROKEN THE COFFEE MACHINE AGAIN!
+!steve,any,"I SAID, CATCH HIM!"
+good night,any,"NO TIME FOR SLEEP, DRINK COFFEE!"
+Good night,"employee,vacationer",REST WELL HARD WORKING EMPLOYEE!
+Good night,any,SLEEP WELL AND BE READY FOR ANOTHER WORK DAY TOMORROW!
+New spark,any,HERE IS YOUR HARD HAT AND FORMS! NOW GET BACK TO WORK!
+!steve,any,GODDAMMIT STEVE!
+!steve,any,STEVE NO!
+Thanks Boss,any,YOU ARE VERY WELCOME! :D
+!tcc,any,HAPPY THUNDERCRACK CARNIVAL! PLEASE ENJOY YOUR 15 MINUTE BREAK!
+!work,"employee,vacationer",GET BACK TO WORK!
+!work,oof,GET BACK TO WORK! ...I GUESS?
+!work,manager,A MANAGER IS HERE! GET BACK TO WORK AND LOOK BUSY!

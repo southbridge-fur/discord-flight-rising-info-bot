@@ -6,10 +6,31 @@ import re
 import os
 import time
 import random
+import csv
 
 client = discord.Client()
 
 baseurl = "http://flightrising.com"
+commandChar = "!"
+
+commands={}
+
+responses={}
+
+with open("bossdad-responses.csv","r",newline='') as f:
+    reader = csv.reader(f,delimiter=",",quotechar='"')
+    for i in reader:
+        for j in i[0].split(","):
+            if j.startswith(commandChar):
+                key = j[1:].lower()
+                if not key in commands:
+                    commands[key] = []
+                commands[key].append((i[1].split(","),i[2]))
+            else:
+                key = j.lower()
+                if not key in responses:
+                    responses[key] = []
+                responses[key].append((i[1].split(","),i[2]))
 
 def getDragonImageURL(dragonid):
     id = int(dragonid)
@@ -55,6 +76,7 @@ Genes\
 .*?Primary</span>(?P<gene_primary>[^<]*)\
 .*?Secondary</span>(?P<gene_secondary>[^<]*)\
 .*?Tertiary</span>(?P<gene_tertiary>[^<]*)\
+.*?Eye\ Type</span>(?P<eye_type>[^<]*)\
 .*?\
 Parents\
 .*?margin-left.*?(<em>(?P<parents>none)</em>|\
@@ -82,20 +104,37 @@ async def on_ready():
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
-    print('------')
 
 @client.event
 async def on_message(message):
     #lets not bother with responding to other bots
     if message.author.bot:
         return
-    
-    if message.content.startswith("."):
-        client.send_typing(message.channel) #this doesn't work for some reason
+
+    global responses
+    global commands
+    triggeredResponses = [i for i in responses.keys() if i in message.content]
+    if triggeredResponses:
+        await client.send_typing(message.channel) #this doesn't work for some reason
+
+        trig = random.choice(triggeredResponses)
+        a = responses[trig]
+        possible = [i for i in a if ((i[0][0] == "any") or (set(message.author.roles) & set(i[0])))]
+        if not possible:
+            return
+        await client.send_message(message.channel, random.choice(possible)[1])
+        return
+    elif message.content.startswith(commandChar):
+        await client.send_typing(message.channel) #this doesn't work for some reason
+
+        content = message.content[1:]
         command = message.content[1:].split(" ")
-        if command[0] == "hi" or command[0] == "hello":
-            await client.send_message(message.channel, random.choice(["Hello","GET BACK TO WORK","Greetings","Hello employee {}".format(message.author.mention)]))
-#        elif command[0] == "brew":
+        if content.lower() in commands:
+            content = content.lower()
+            possible = [i for i in commands[content] if ((i[0][0] == "any") or (set(message.author.roles) & set(i[0])))]
+            await client.send_message(message.channel, random.choice(possible)[1])
+            return
+        #        elif command[0] == "brew":
 #            await client.send_message(message.channel, 'Got it, setting reminder for {} in 30 minutes'.format(message.author.mention()))
 #        elif command[0] == "scry":
             #http://flightrising.com/includes/ol/scryer_bloodlines.php
@@ -103,18 +142,18 @@ async def on_message(message):
             #id1	29939190+
             #id2	29994524+
 #            print("Checking bloodlines")
-        elif command[0] == "work" or command[0] == "shout":
-            if len(message.mentions) > 0:
-                #I'm lazy so I'm just responding with whatever the first mention is in the list
-                await client.send_message(message.channel, "{} GET BACK TO WORK".format(message.mentions[0].mention))
-            else:
-                await client.send_message(message.channel, "GET BACK TO WORK")
+        # elif command[0] == "work" or command[0] == "shout":
+        #     if len(message.mentions) > 0:
+        #         #I'm lazy so I'm just responding with whatever the first mention is in the list
+        #         await client.send_message(message.channel, "{} GET BACK TO WORK".format(message.mentions[0].mention))
+        #     else:
+        #         await client.send_message(message.channel, "GET BACK TO WORK")
         elif command[0] == "exalt":
             if len(message.mentions) > 0:
                 if message.mentions[0].id == client.user.id:
-                    await client.send_message(message.channel, "No")
+                    await client.send_message(message.channel, random.choice(["No","YOU'RE FIRED"]))
                 else:
-                    await client.send_message(message.channel, "{0} has been exalted for {1} treasure.".format(message.mentions[0].mention,random.randint(2494,38161)))
+                    await client.send_message(message.channel, "{0} HAS BEEN EXALTED FOR {1} TREASURE.".format(message.mentions[0].mention,random.randint(2494,38161)))
         elif command[0] == "lookup":
             global baseurl
             dragonid = command[1]
@@ -168,7 +207,8 @@ async def on_message(message):
             embed.add_field(name="Colors and Genes",value="""\
 **Primary:** {0[data][gene_primary]:20}
 **Secondary:** {0[data][gene_secondary]:20}
-**Tertiary:** {0[data][gene_tertiary]:20}""".format(ddata),inline=True)
+**Tertiary:** {0[data][gene_tertiary]:20}
+**Eye Type:** {0[data][eye_type]:20}""".format(ddata),inline=True)
 
 #            stats = "{0[0]}\t{0[1]}\n{0[2]}\t{0[3]}\n{0[4]}\t{0[5]}\n{0[6]}".format(["**{0:4}**: {1:4} {2}".format(i.upper(),ddata["stats"][i]["base"],ddata["stats"][i]["mod"],align="right") for i in ddata["stats"].keys()])
 #            embed.add_field(name="Stats",value=stats,inline=False)

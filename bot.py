@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import asyncio
 import json
 import requests
@@ -8,7 +9,10 @@ import time
 import random
 import csv
 
-client = discord.Client()
+# using the commands.Bot() structure for its built-in command functionality.
+client = commands.Bot(command_prefix = "!")
+# contains !brew and !transmute
+client.load_extension('baldwin')
 
 baseurl = "http://flightrising.com"
 commandChar = "!"
@@ -233,6 +237,9 @@ async def on_message(message):
             
 
             await client.send_message(message.channel, None, embed=embed)
+    # this hook will always fire to process commands, at the end of everything else.
+    # if commands overlap with ones that had been defined beforehand, you'll get double messages.
+    await client.process_commands(message)
             
 creds = json.load(open("creds.json","r"))
 
